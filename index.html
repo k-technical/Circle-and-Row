@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Скруглятор SVG</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>🎯 Скруглятор</h1>
+            <p class="subtitle">Загрузите SVG-схему зала — заменим группы рядов на круги</p>
+        </div>
+
+        <!-- Drag-and-drop зона -->
+        <div class="drop-zone" id="dropZone">
+            <span class="drop-zone__icon">📂</span>
+            <p class="drop-zone__text">Перетащите SVG-файл сюда<br>или нажмите для выбора</p>
+            <p class="drop-zone__hint">Поддерживаются файлы .svg</p>
+            <input type="file" id="fileInput" accept=".svg">
+        </div>
+
+        <!-- Сообщение -->
+        <div class="message" id="message"></div>
+
+        <!-- Preview -->
+        <div class="preview-section" id="previewSection">
+            <p class="preview-label">Предпросмотр результата</p>
+            <div class="preview-container" id="previewContainer"></div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="actions" id="actions">
+            <button class="btn btn--primary" id="downloadBtn">💾 Скачать результат</button>
+            <button class="btn btn--danger" id="clearBtn">🗑 Очистить</button>
+        </div>
+
+        <p class="footer-note">Группы с id <code>Ряд_...</code> будут заменены на круги или эллипсы</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

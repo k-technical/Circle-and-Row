@@ -1,0 +1,252 @@
+:root {
+    --bg: #1a1a2e;
+    --surface: #252540;
+    --surface-hover: #2e2e4a;
+    --border: #3a3a5c;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0b8;
+    --accent: #7c5cbf;
+    --accent-hover: #9b7ed4;
+    --danger: #e0556a;
+    --danger-hover: #f07080;
+    --success: #5cb87a;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: 0.2s ease;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg);
+    font-family: 'Calibri', 'Trebuchet MS', sans-serif;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 30px 20px;
+}
+
+.app {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Заголовок */
+.header {
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.header .subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+}
+
+/* Зона загрузки */
+.drop-zone {
+    position: relative;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--transition), background-color var(--transition);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+    border-color: var(--accent);
+    background-color: rgba(124, 92, 191, 0.07);
+}
+
+.drop-zone.file-loaded {
+    border-color: var(--success);
+    border-style: solid;
+    background-color: rgba(92, 184, 122, 0.06);
+}
+
+.drop-zone__icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    display: block;
+    opacity: 0.7;
+}
+
+.drop-zone__text {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.drop-zone__hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Preview */
+.preview-section {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.preview-section.visible {
+    display: flex;
+}
+
+.preview-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+}
+
+.preview-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: 500px;
+    background-color: #ffffff;
+    border-radius: var(--radius-sm);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.preview-container svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+
+/* Сообщения */
+.message {
+    display: none;
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    backdrop-filter: blur(4px);
+}
+
+.message.visible {
+    display: block;
+}
+
+.message--warning {
+    background-color: rgba(224, 180, 80, 0.15);
+    color: #e0b450;
+    border: 1px solid rgba(224, 180, 80, 0.3);
+}
+
+.message--success {
+    background-color: rgba(92, 184, 122, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(92, 184, 122, 0.3);
+}
+
+/* Кнопки */
+.actions {
+    display: none;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.actions.visible {
+    display: flex;
+}
+
+.btn {
+    flex: 1;
+    min-width: 160px;
+    padding: 14px 24px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: background-color var(--transition), transform var(--transition), opacity var(--transition);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn--primary {
+    background-color: var(--accent);
+    color: #fff;
+}
+
+.btn--primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn--outline {
+    background-color: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+}
+
+.btn--outline:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: #555;
+}
+
+.btn--danger {
+    background-color: transparent;
+    color: var(--danger);
+    border: 1.5px solid var(--danger);
+}
+
+.btn--danger:hover {
+    background-color: rgba(224, 85, 106, 0.1);
+}
+
+.footer-note {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+@media (max-width: 500px) {
+    .btn {
+        min-width: 100%;
+    }
+}
