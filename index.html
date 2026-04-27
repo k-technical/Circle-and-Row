@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Скруглятор SVG</title>
+    <title>Обработчик SVG-схем</title>
     <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
     <div class="app">
         <div class="header">
-            <h1>🎯 Скруглятор</h1>
-            <p class="subtitle">Загрузите SVG-схему зала — заменим группы рядов на круги</p>
+            <h1>🛠 Обработчик SVG-схем</h1>
+            <p class="subtitle">Загрузите файл и выберите режим обработки</p>
         </div>
 
         <!-- Drag-and-drop зона -->
@@ -24,6 +24,23 @@
         <!-- Сообщение -->
         <div class="message" id="message"></div>
 
+        <!-- Выбор режима -->
+        <div class="mode-selector" id="modeSelector">
+            <p class="mode-selector__label">Выберите режим обработки:</p>
+            <div class="mode-selector__buttons">
+                <button class="mode-btn mode-btn--active" id="modeCircles" data-mode="circles">
+                    <span class="mode-btn__icon">🔵</span>
+                    <span class="mode-btn__text">Замена кругов</span>
+                    <span class="mode-btn__hint">Группы → круги/эллипсы</span>
+                </button>
+                <button class="mode-btn" id="modeScheme" data-mode="scheme">
+                    <span class="mode-btn__icon">🏷️</span>
+                    <span class="mode-btn__text">Преобразователь схемы</span>
+                    <span class="mode-btn__hint">Исправление id рядов и мест</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Preview -->
         <div class="preview-section" id="previewSection">
             <p class="preview-label">Предпросмотр результата</p>
@@ -36,7 +53,9 @@
             <button class="btn btn--danger" id="clearBtn">🗑 Очистить</button>
         </div>
 
-        <p class="footer-note">Группы с id <code>Ряд_...</code> будут заменены на круги или эллипсы</p>
+        <p class="footer-note">
+            <span id="footerText">Загрузите SVG-файл, чтобы начать обработку</span>
+        </p>
     </div>
 
     <script src="app.js"></script>

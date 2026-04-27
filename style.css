@@ -10,8 +10,10 @@
     --danger: #e0556a;
     --danger-hover: #f07080;
     --success: #5cb87a;
+    --warning: #e0b450;
     --radius: 16px;
     --radius-sm: 10px;
+    --radius-xs: 8px;
     --transition: 0.2s ease;
 }
 
@@ -38,10 +40,10 @@ body {
 
 .app {
     width: 100%;
-    max-width: 700px;
+    max-width: 720px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 /* Заголовок */
@@ -67,7 +69,7 @@ body {
     position: relative;
     border: 2px dashed var(--border);
     border-radius: var(--radius);
-    padding: 48px 24px;
+    padding: 40px 24px;
     text-align: center;
     cursor: pointer;
     transition: border-color var(--transition), background-color var(--transition);
@@ -83,12 +85,12 @@ body {
 .drop-zone.file-loaded {
     border-color: var(--success);
     border-style: solid;
-    background-color: rgba(92, 184, 122, 0.06);
+    background-color: rgba(92, 184, 122, 0.05);
 }
 
 .drop-zone__icon {
     font-size: 40px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     display: block;
     opacity: 0.7;
 }
@@ -96,7 +98,7 @@ body {
 .drop-zone__text {
     font-size: 16px;
     color: var(--text-secondary);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .drop-zone__hint {
@@ -112,11 +114,89 @@ body {
     cursor: pointer;
 }
 
+/* Выбор режима */
+.mode-selector {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mode-selector.visible {
+    display: flex;
+}
+
+.mode-selector__label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+}
+
+.mode-selector__buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 500px) {
+    .mode-selector__buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 12px;
+    background-color: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color var(--transition), background-color var(--transition), transform var(--transition);
+    font-family: inherit;
+    color: var(--text);
+}
+
+.mode-btn:hover {
+    border-color: var(--accent);
+    background-color: var(--surface-hover);
+}
+
+.mode-btn--active {
+    border-color: var(--accent);
+    background-color: rgba(124, 92, 191, 0.12);
+}
+
+.mode-btn--active:hover {
+    background-color: rgba(124, 92, 191, 0.18);
+}
+
+.mode-btn:active {
+    transform: scale(0.98);
+}
+
+.mode-btn__icon {
+    font-size: 28px;
+}
+
+.mode-btn__text {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.mode-btn__hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
 /* Preview */
 .preview-section {
     display: none;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .preview-section.visible {
@@ -169,7 +249,7 @@ body {
 
 .message--warning {
     background-color: rgba(224, 180, 80, 0.15);
-    color: #e0b450;
+    color: var(--warning);
     border: 1px solid rgba(224, 180, 80, 0.3);
 }
 
@@ -201,7 +281,7 @@ body {
     font-weight: 600;
     cursor: pointer;
     letter-spacing: 0.3px;
-    transition: background-color var(--transition), transform var(--transition), opacity var(--transition);
+    transition: background-color var(--transition), transform var(--transition);
 }
 
 .btn:active {
@@ -217,17 +297,6 @@ body {
     background-color: var(--accent-hover);
 }
 
-.btn--outline {
-    background-color: transparent;
-    color: var(--text);
-    border: 1.5px solid var(--border);
-}
-
-.btn--outline:hover {
-    background-color: rgba(255, 255, 255, 0.04);
-    border-color: #555;
-}
-
 .btn--danger {
     background-color: transparent;
     color: var(--danger);
@@ -238,6 +307,7 @@ body {
     background-color: rgba(224, 85, 106, 0.1);
 }
 
+/* Подвал */
 .footer-note {
     text-align: center;
     font-size: 13px;
@@ -245,8 +315,9 @@ body {
     opacity: 0.6;
 }
 
-@media (max-width: 500px) {
-    .btn {
-        min-width: 100%;
-    }
+.footer-note code {
+    background-color: rgba(255, 255, 255, 0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
 }
