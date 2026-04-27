@@ -20,38 +20,41 @@
     let processedSVGText = '';
     let currentFileName = 'scheme';
     let activeMode = 'circles'; // 'circles' или 'scheme'
+    let fileLoaded = false; // флаг: загружен ли файл
 
     // ---------- Вспомогательные функции ----------
 
-    /** Показать сообщение */
     function showMessage(text, type = 'warning') {
         messageEl.textContent = text;
         messageEl.className = `message message--${type} visible`;
     }
 
-    /** Скрыть сообщение */
     function hideMessage() {
         messageEl.className = 'message';
     }
 
-    /** Показать интерфейс после загрузки */
-    function showUI() {
+    function showModeSelector() {
         modeSelector.classList.add('visible');
+    }
+
+    function showPreviewAndActions() {
         previewSection.classList.add('visible');
         actions.classList.add('visible');
     }
 
-    /** Скрыть интерфейс */
-    function hideUI() {
-        modeSelector.classList.remove('visible');
+    function hidePreviewAndActions() {
         previewSection.classList.remove('visible');
         actions.classList.remove('visible');
         previewContainer.innerHTML = '';
+    }
+
+    function hideAll() {
+        modeSelector.classList.remove('visible');
+        hidePreviewAndActions();
         dropZone.classList.remove('file-loaded');
         footerText.textContent = 'Загрузите SVG-файл, чтобы начать обработку';
     }
 
-    /** Переключение активного режима */
     function setActiveMode(mode) {
         activeMode = mode;
         if (mode === 'circles') {
@@ -63,13 +66,12 @@
             modeCirclesBtn.classList.remove('mode-btn--active');
             footerText.textContent = 'Режим «Преобразователь схемы»: исправление id рядов и мест';
         }
-        // Перезапустить обработку с новым режимом
-        if (originalSVGText) {
+        // Если файл уже загружен — сразу обрабатываем в новом режиме
+        if (fileLoaded && originalSVGText) {
             processAndShow();
         }
     }
 
-    /** Скачать файл */
     function downloadSVG(svgText, filename) {
         const blob = new Blob([svgText], { type: 'image/svg+xml' });
         const url = URL.createObjectURL(blob);
@@ -82,12 +84,10 @@
         URL.revokeObjectURL(url);
     }
 
-    /** Отобразить SVG в preview */
     function renderPreview(svgText) {
         previewContainer.innerHTML = svgText;
     }
 
-    /** Склонение слова "ряд" */
     function pluralizeRows(count) {
         const mod10 = count % 10;
         const mod100 = count % 100;
@@ -96,11 +96,19 @@
         return 'рядов';
     }
 
-    // ---------- Режим 1: Замена кругов ----------
+    // ---------- Проверки для каждого режима ----------
 
-    function hasRows(svgText) {
+    /** Для режима «Замена кругов»: нужны группы <g> с id "Ряд_..." */
+    function hasGroupsWithRows(svgText) {
         return /<g[^>]*\bid\s*=\s*["']([^"']*Ряд_[^"']*)["'][^>]*>/i.test(svgText);
     }
+
+    /** Для режима «Преобразователь схемы»: нужны id с "::Место_" или "Ряд_::" */
+    function hasSchemeMarkers(svgText) {
+        return svgText.includes('::Место_') || svgText.includes('Ряд_::');
+    }
+
+    // ---------- Режим 1: Замена кругов ----------
 
     function processCircles(svgText) {
         const parser = new DOMParser();
@@ -135,30 +143,22 @@
     const WRONG_SEAT = '::Место_';
     const PATH_ID = 'Контур_1';
 
-    function hasSchemeMarkers(svgText) {
-        return svgText.includes(WRONG_SEAT) || svgText.includes(EMPTY_ROW);
-    }
-
     function processScheme(svgText) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(svgText, 'image/svg+xml');
 
-        // Обработка рядов по id (все элементы с id, начинающимся на "Ряд_")
         const rowElements = doc.querySelectorAll('[id^="Ряд_"]');
         let processedCount = 0;
 
         rowElements.forEach((el) => {
             let id = el.getAttribute('id');
 
-            // Замена Ряд_:: на Ряд_
             if (id.includes(EMPTY_ROW)) {
                 id = id.replace(EMPTY_ROW, ROW);
             }
 
-            // Обработка ::Место_
             if (id.includes(WRONG_SEAT)) {
                 const parts = id.split(WRONG_SEAT);
-                // Берём часть после ::Место_ и ставим дефис
                 if (parts.length >= 2) {
                     id = parts[0] + '-' + parts[1];
                 }
@@ -168,7 +168,6 @@
             processedCount++;
         });
 
-        // Всем path присвоить id = Контур_1
         const paths = doc.querySelectorAll('path');
         paths.forEach((path) => {
             path.setAttribute('id', PATH_ID);
@@ -181,34 +180,38 @@
         };
     }
 
-    // ---------- Запуск обработки ----------
+    // ---------- Запуск обработки (только после выбора режима) ----------
 
     function processAndShow() {
+        hideMessage();
         let result;
 
         if (activeMode === 'circles') {
-            if (!hasRows(originalSVGText)) {
+            // Проверяем наличие групп <g> с Ряд_
+            if (!hasGroupsWithRows(originalSVGText)) {
                 showMessage(
-                    '⚠️ Ряды не найдены в SVG. Проверьте, что группы имеют id "Ряд_..."',
+                    '⚠️ Группы &lt;g&gt; с id "Ряд_..." не найдены. В этом режиме нужны группы с кругами внутри.',
                     'warning'
                 );
-                previewSection.classList.remove('visible');
-                actions.classList.remove('visible');
-                dropZone.classList.remove('file-loaded');
+                // Показываем исходный SVG
+                renderPreview(originalSVGText);
+                showPreviewAndActions();
+                dropZone.classList.add('file-loaded');
                 return;
             }
             const processed = processCircles(originalSVGText);
             processedSVGText = processed.result;
             result = processed;
         } else {
+            // Проверяем наличие маркеров "::Место_" или "Ряд_::"
             if (!hasSchemeMarkers(originalSVGText)) {
                 showMessage(
-                    '⚠️ Маркеры "::Место_" или "Ряд_::" не найдены в SVG.',
+                    '⚠️ Маркеры "::Место_" или "Ряд_::" не найдены. Нечего преобразовывать.',
                     'warning'
                 );
-                previewSection.classList.remove('visible');
-                actions.classList.remove('visible');
-                dropZone.classList.remove('file-loaded');
+                renderPreview(originalSVGText);
+                showPreviewAndActions();
+                dropZone.classList.add('file-loaded');
                 return;
             }
             const processed = processScheme(originalSVGText);
@@ -216,9 +219,8 @@
             result = processed;
         }
 
-        hideMessage();
-        showUI();
         renderPreview(processedSVGText);
+        showPreviewAndActions();
         dropZone.classList.add('file-loaded');
 
         const count = result.replacedCount || 0;
@@ -237,7 +239,7 @@
         }
     }
 
-    // ---------- Обработка файла ----------
+    // ---------- Обработка файла (только загрузка, без обработки) ----------
 
     function handleSVGFile(file) {
         if (!file.name.toLowerCase().endsWith('.svg')) {
@@ -251,7 +253,16 @@
 
         reader.onload = function(event) {
             originalSVGText = event.target.result;
-            processAndShow();
+            fileLoaded = true;
+            processedSVGText = '';
+
+            // Показываем только исходный SVG и выбор режима
+            hideMessage();
+            renderPreview(originalSVGText);
+            showPreviewAndActions();
+            showModeSelector();
+            dropZone.classList.add('file-loaded');
+            footerText.textContent = 'Выберите режим обработки выше';
         };
 
         reader.onerror = function() {
@@ -263,7 +274,6 @@
 
     // ---------- Обработчики событий ----------
 
-    // Drag-and-drop
     dropZone.addEventListener('dragover', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -286,13 +296,11 @@
         }
     });
 
-    // Клик по зоне — открыть выбор файла
     dropZone.addEventListener('click', function(e) {
         if (e.target === fileInput) return;
         fileInput.click();
     });
 
-    // Выбор файла через input
     fileInput.addEventListener('change', function() {
         if (fileInput.files.length > 0) {
             handleSVGFile(fileInput.files[0]);
@@ -300,7 +308,6 @@
         }
     });
 
-    // Переключение режимов
     modeCirclesBtn.addEventListener('click', function() {
         setActiveMode('circles');
     });
@@ -309,29 +316,31 @@
         setActiveMode('scheme');
     });
 
-    // Скачивание
     downloadBtn.addEventListener('click', function() {
         if (processedSVGText) {
             const suffix = activeMode === 'circles' ? '_rounded' : '_fixed';
             downloadSVG(processedSVGText, currentFileName + suffix);
             showMessage('✅ Файл сохранён!', 'success');
+        } else {
+            // Если обработка не запускалась — скачиваем исходник
+            downloadSVG(originalSVGText, currentFileName + '_original');
+            showMessage('⚠️ Скачан исходный файл (обработка не применялась).', 'warning');
         }
     });
 
-    // Очистка
     clearBtn.addEventListener('click', function() {
         originalSVGText = '';
         processedSVGText = '';
         currentFileName = 'scheme';
-        hideUI();
+        fileLoaded = false;
+        hideAll();
         hideMessage();
-        dropZone.classList.remove('file-loaded');
         fileInput.value = '';
         activeMode = 'circles';
         setActiveMode('circles');
     });
 
-    // Начальная установка режима
+    // Начальная установка
     setActiveMode('circles');
 
 })();
