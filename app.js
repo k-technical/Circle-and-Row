@@ -136,49 +136,54 @@
         };
     }
 
-    // ---------- Режим 2: Преобразователь схемы ----------
+   // ---------- Режим 2: Преобразователь схемы ----------
 
-    const EMPTY_ROW = 'Ряд_::';
-    const ROW = 'Ряд_';
-    const WRONG_SEAT = '::Место_';
-    const PATH_ID = 'Контур_1';
+const EMPTY_ROW = 'Ряд_::';
+const ROW = 'Ряд_';
+const WRONG_SEAT = '::Место_';
+const PATH_ID = 'Контур_1';
 
-    function processScheme(svgText) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(svgText, 'image/svg+xml');
+function processScheme(svgText) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgText, 'image/svg+xml');
 
-        const rowElements = doc.querySelectorAll('[id^="Ряд_"]');
-        let processedCount = 0;
+    const rowElements = doc.querySelectorAll('[id^="Ряд_"]');
+    let processedCount = 0;
 
-        rowElements.forEach((el) => {
-            let id = el.getAttribute('id');
+    rowElements.forEach((el) => {
+        let id = el.getAttribute('id');
 
-            if (id.includes(EMPTY_ROW)) {
-                id = id.replace(EMPTY_ROW, ROW);
+        // Замена Ряд_:: на Ряд_
+        if (id.includes(EMPTY_ROW)) {
+            id = id.replace(EMPTY_ROW, ROW);
+        }
+
+        // Обработка ::Место_M → |M-M
+        if (id.includes(WRONG_SEAT)) {
+            const parts = id.split(WRONG_SEAT);
+            // parts[0] = "Ряд_N", parts[1] = "M"
+            if (parts.length >= 2) {
+                const seatNum = parts[1];
+                id = parts[0] + '|' + seatNum + '-' + seatNum;
             }
+        }
 
-            if (id.includes(WRONG_SEAT)) {
-                const parts = id.split(WRONG_SEAT);
-                if (parts.length >= 2) {
-                    id = parts[0] + '-' + parts[1];
-                }
-            }
+        el.setAttribute('id', id);
+        processedCount++;
+    });
 
-            el.setAttribute('id', id);
-            processedCount++;
-        });
+    // Всем path присвоить id = Контур_1
+    const paths = doc.querySelectorAll('path');
+    paths.forEach((path) => {
+        path.setAttribute('id', PATH_ID);
+    });
 
-        const paths = doc.querySelectorAll('path');
-        paths.forEach((path) => {
-            path.setAttribute('id', PATH_ID);
-        });
-
-        const serializer = new XMLSerializer();
-        return {
-            result: serializer.serializeToString(doc),
-            replacedCount: processedCount
-        };
-    }
+    const serializer = new XMLSerializer();
+    return {
+        result: serializer.serializeToString(doc),
+        replacedCount: processedCount
+    };
+}
 
     // ---------- Запуск обработки (только после выбора режима) ----------
 
